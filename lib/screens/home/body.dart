@@ -128,7 +128,10 @@ class _BodyState extends State<Body> {
       Column(
         children: [
           const SearchSection(),
-          sliders.isEmpty ? const Text("Loading Sliders..") : Home_Slider(sliders: sliders),
+          sliders.isEmpty ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LinearProgressIndicator(minHeight: 180,backgroundColor: Colors.cyan.shade50,color: Colors.cyan.shade200,),
+          ) : Home_Slider(sliders: sliders),
           Container(
             margin: const EdgeInsets.only(top: 05.0),
             //height: size.height * 0.2,
@@ -161,7 +164,10 @@ class _BodyState extends State<Body> {
               ),
             ),
           ),
-          offers.isEmpty ? const Text("Loading Offers..") : OfferSection(offers: offers),
+          offers.isEmpty ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LinearProgressIndicator(minHeight: 150,backgroundColor: Colors.cyan.shade50,color: Colors.cyan.shade200,),
+          ) : OfferSection(offers: offers),
           ListTile(
             title: Row(
               children: const [
@@ -183,7 +189,10 @@ class _BodyState extends State<Body> {
               ),
             ),
           ),
-          upcomings.isEmpty ? const Text("Loading Upcomings..") : UpcomingSection(upcomings: upcomings),
+          upcomings.isEmpty ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LinearProgressIndicator(minHeight: 150,backgroundColor: Colors.cyan.shade50,color: Colors.cyan.shade200,),
+          ) : UpcomingSection(upcomings: upcomings),
           ListTile(
             title: Row(
               children: const [
@@ -205,7 +214,10 @@ class _BodyState extends State<Body> {
               ),
             ),
           ),
-          upcomings.isEmpty ? const Text("Loading For You") : ForyouSection(foryou: foryou),
+          upcomings.isEmpty ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LinearProgressIndicator(minHeight: 150,backgroundColor: Colors.cyan.shade50,color: Colors.cyan.shade200,),
+          ) : ForyouSection(foryou: foryou),
           ListTile(
             title: Row(
               children: const [

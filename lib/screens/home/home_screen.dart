@@ -1,10 +1,16 @@
 import 'package:badges/badges.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 //import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yris/constants.dart';
+import 'package:yris/screens/cart/cart_screen.dart';
 import 'package:yris/screens/home/body.dart';
 import 'package:yris/screens/home/app_footer.dart';
+
+import '../../database/db_helper.dart';
+import '../../provider/cart_provider.dart';
+import '../notification/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,23 +20,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // void _onItemTapped(int index) {
-  //   setState(() {
-  //     _selectedIndex = index;
-  //   });
-  //   // if(index==1){
-  //   //   Navigator.push(
-  //   //     context,
-  //   //     MaterialPageRoute(builder: (context) => AskInfoScreen()),
-  //   //   );
-  //   // }
-  //   // if(index==3){
-  //   //   Navigator.push(
-  //   //     context,
-  //   //     MaterialPageRoute(builder: (context) => Profile_Screen()),
-  //   //   );
-  //   // }
-  // }int _selectedIndex = 0;
+  DBHelper? dbHelper = DBHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CartProvider>().getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,17 +86,49 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.favorite)
         ),
-
-        Badge(
-          position: BadgePosition.topEnd(top: 0, end: -6),
-          badgeContent: Text('3',style: const TextStyle(color: Colors.white,)),
-          child: Icon(Icons.notifications),
+        IconButton(
+            onPressed: () async {
+              Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => NotificationScreen()),
+                      );
+            },
+            icon: Icon(Icons.notifications)
         ),
-        SizedBox(width: 15),
+        // GestureDetector(
+        //   onTap: (){
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(builder: (context) => NotificationScreen()),
+        //     );
+        //   },
+        //   child: Badge(
+        //     position: BadgePosition.topEnd(top: 0, end: -6),
+        //     badgeContent: Text('3',style: const TextStyle(color: Colors.white,)),
+        //     child: Icon(Icons.notifications),
+        //   ),
+        // ),
+        SizedBox(width: 5),
         Badge(
-          position: BadgePosition.topEnd(top: 0, end: -6),
-          badgeContent: Text('3',style: const TextStyle(color: Colors.white,)),
-          child: Icon(Icons.shopping_cart),
+          badgeContent: Consumer<CartProvider>(
+            builder: (context, value, child) {
+              return Text(
+                value.getCounter().toString(),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
+              );
+            },
+          ),
+          position: const BadgePosition(start: 30, bottom: 30),
+          child: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartScreen()),
+              );
+            },
+            icon: const Icon(Icons.shopping_cart, ),
+          ),
         ),
         SizedBox(width: 15),
       ],

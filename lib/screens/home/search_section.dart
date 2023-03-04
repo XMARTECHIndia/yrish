@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yris/constants.dart';
+
+import '../search/search_screen.dart';
 // import 'package:expertjo/screens/servicelist/components/servicelist_screen.dart';
 
 class SearchSection extends StatelessWidget {
@@ -35,10 +37,10 @@ class SearchSection extends StatelessWidget {
             //top: 5,
             child: InkWell(
               onTap: (){
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => ServiceListScreen(servicecats: kOptions,)),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchScreen()),
+                );
               },
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: myDefaultPadding, vertical: 5),
@@ -60,10 +62,10 @@ class SearchSection extends StatelessWidget {
                     Spacer(),
                     IconButton(
                       onPressed: (){
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => ServiceListScreen(servicecats: kOptions)),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SearchScreen()),
+                        );
                       },
                       icon: Icon(Icons.search),
                       color: Colors.cyan,

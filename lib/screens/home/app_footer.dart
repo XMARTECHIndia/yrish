@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:yris/screens/order/myorders_screen.dart';
 
 import '../../../main.dart';
 import '../arrivals/arrival_screen.dart';
@@ -48,10 +49,10 @@ class _AppFooterState extends State<AppFooter> {
       );
     }
     if(index==4){
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ArrivalScreen()),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyOrderScreen()),
+      );
     }
   }
 

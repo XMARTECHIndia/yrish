@@ -13,6 +13,7 @@ import '../../models/Parentcat.model.dart';
 import '../../models/Product.model.dart';
 import '../../models/Slider.model.dart';
 import '../../provider/cart_provider.dart';
+import '../cart/cart_screen.dart';
 import '../categories/parent_category_screen.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -126,7 +127,7 @@ class _ProductScreenState extends State<ProductScreen> {
           productId: product[0].proId,
           productName: productname,
           initialPrice: productprice,
-          productPrice: productprice,
+          productPrice: productOfferprice > 0 ? productOfferprice : productprice,
           quantity: ValueNotifier(1),
           unitTag: "piece",
           image: productimg0,
@@ -168,8 +169,6 @@ class _ProductScreenState extends State<ProductScreen> {
         // ),
         actions: [
           Badge(
-            position: BadgePosition.topEnd(top: 0, end: -6),
-            //badgeContent: Text('3',style: const TextStyle(color: Colors.white,)),
             badgeContent: Consumer<CartProvider>(
               builder: (context, value, child) {
                 return Text(
@@ -179,12 +178,26 @@ class _ProductScreenState extends State<ProductScreen> {
                 );
               },
             ),
-            child: Icon(Icons.shopping_cart,color: Colors.cyan,),
+            position: const BadgePosition(start: 30, bottom: 30),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CartScreen()),
+                );
+              },
+              icon: const Icon(Icons.shopping_cart, color: Colors.cyan,),
+            ),
           ),
           SizedBox(width: 18),
         ],
       ),
-      body: SingleChildScrollView(
+      body:product.isEmpty ?Container(
+            alignment: Alignment.center,
+            color: Colors.white70,
+            child: CircularProgressIndicator(),
+          )
+          :SingleChildScrollView(
         child:
         Column(
           children: [
@@ -314,12 +327,18 @@ class _ProductScreenState extends State<ProductScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        Text("₹"+this.productOfferprice.toString(),style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.white),),
+                        productOfferprice > 0 ?
+                        Text("₹"+this.productOfferprice.toString(),style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.white),)
+                        :
+                        Text("₹"+this.productprice.toString(),style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.white),),
+                        productOfferprice > 0 ?
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0,top: 2,right: 8),
                           child: Text("₹"+this.productprice.toString(),style: TextStyle(fontSize:19 ,decoration: TextDecoration.lineThrough,fontWeight:FontWeight.bold,color: Colors.white60),),
-                        ),
-                        Text(this.offerpercent.ceil().toString()+"% Off", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.lightGreenAccent),),
+                        ) : Text(""),
+                        productOfferprice > 0 ?
+                        Text(this.offerpercent.ceil().toString()+"% Off", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.lightGreenAccent),)
+                            : Text("")
                       ],
                     ),
                   ): Padding(

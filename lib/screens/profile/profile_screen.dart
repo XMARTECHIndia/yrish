@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +8,47 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../constants.dart';
 import '../../../main.dart';
+import '../../models/DeliveryAddress.model.dart';
 import '../../models/Userdata.model.dart';
 import '../home/app_footer.dart';
+import '../order/myorders_screen.dart';
+
+const List<String> statelist = <String>[ "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttarakhand",
+  "Uttar Pradesh",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli",
+  "Daman and Diu",
+  "Delhi",
+  "Lakshadweep",
+  "Puducherry"];
 
 class Profile_Screen extends StatefulWidget {
   const Profile_Screen({Key? key}) : super(key: key);
@@ -19,10 +60,21 @@ class Profile_Screen extends StatefulWidget {
 class _Profile_ScreenState extends State<Profile_Screen> {
   String? uid ;
   String balance = "";
+  List<DeliveryAddressModel> delvaddress = [] ;
   List<UserdataModel> details=[];
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  TextEditingController addline1Controller = TextEditingController();
+  TextEditingController addline2Controller = TextEditingController();
+  TextEditingController landmarkController = TextEditingController();
+  TextEditingController addphoneController = TextEditingController();
+  TextEditingController addpinController = TextEditingController();
+  TextEditingController addcityController = TextEditingController();
+  String addstateController = statelist.elementAt(28);
+
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +108,20 @@ class _Profile_ScreenState extends State<Profile_Screen> {
         phoneController.text = (details.length > 0 ? this.details[0].usrPhone : "your phone");
       });
     });
+    getUserdeliveryAdd();
+    // Dio().post("$baseUrl/user_delivery_address_api",
+    //   data:{
+    //     "uid": uid,
+    //   },
+    //   options: Options(
+    //     responseType: ResponseType.plain,
+    //   ),
+    // ).then((data){
+    //   var temp = jsonDecode(data.data);
+    //   setState(() {
+    //     delvaddress = deliveryAddressModelFromJson(data.data.toString());
+    //   });
+    // });
 
     Dio().post("$baseUrl/wallet_bal_api",
       data:{
@@ -70,6 +136,232 @@ class _Profile_ScreenState extends State<Profile_Screen> {
         //print(data.data.toString());
       });
     });
+  }
+  getUserdeliveryAdd(){
+    Dio().post("$baseUrl/user_delivery_address_api",
+      data:{
+        "uid": uid,
+      },
+      options: Options(
+        responseType: ResponseType.plain,
+      ),
+    ).then((data){
+      var temp = jsonDecode(data.data);
+      setState(() {
+        delvaddress = deliveryAddressModelFromJson(data.data.toString());
+      });
+    });
+  }
+  saveAddress(type){
+    //print(uid);
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) =>
+          AlertDialog(
+            title: Column(
+              children: [
+                type=="homeAddress" ? Text('Enter Home Address') : Text('Enter Work Address'),
+              ],
+            ),
+            content: Container(
+              width: 300,
+              height: 400,
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                    controller: addline1Controller,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                      ),
+                      border: OutlineInputBorder(),
+                      labelText: 'Address Line 1',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                      controller: addline2Controller,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'Address Line 2',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                      controller: landmarkController,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'Landmark',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                      controller: addphoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'Phone Number',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                      controller: addpinController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'Pincode',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 55,
+                    child: TextField(
+                      controller: addcityController,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                        ),
+                        border: OutlineInputBorder(),
+                        labelText: 'City',
+                      ),
+                    ),
+                  ),
+                  FormField<String>(
+                    builder: (FormFieldState<String> state) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: const BoxDecoration(
+                          //color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            topLeft: Radius.circular(10),
+                          ),
+                        ),
+                        height: 60,
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            //labelStyle: textStyle,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                              ),
+                              errorStyle: TextStyle(color: Colors.redAccent, fontSize: 16.0),
+                              hintText: 'Please select State',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0))),
+                          //isEmpty: dropdowngender == '',
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: addstateController,
+                              isDense: true,
+                              onChanged: (String? value) {
+                                // This is called when the user selects an item.
+                                setState(() {
+                                  addstateController = value!;
+                                });
+                              },
+                              items: statelist.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ]
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(context, 'Cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Dio().post("$baseUrl/updateuser_address_api",
+                    data:{
+                      "uid":uid,
+                      "addresstype" : type,
+                      "a_line_one" : addline1Controller.text,
+                      "a_line_two" : addline2Controller.text,
+                      "a_land_mark" : landmarkController.text,
+                      "a_phone" : phoneController.text,
+                      "a_pin_code": addpinController.text,
+                      "a_city" : addcityController.text,
+                      "a_state" : addstateController
+                    },
+                    options: Options(
+                      responseType: ResponseType.plain,
+                    ),
+                  ).then((data){
+                    Navigator.pop(context, 'Save');
+                    setState(() {
+                      getUserdeliveryAdd();
+                    });
+                  });
+
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -94,12 +386,18 @@ class _Profile_ScreenState extends State<Profile_Screen> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Container(
+        child: balance.isEmpty ?
+            Container(
+              padding: EdgeInsets.only(top: 20),
+              alignment: Alignment.center,
+              color: Colors.white70,
+              child: CircularProgressIndicator(),
+            ): Container(
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children:  [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: SizedBox(
@@ -119,9 +417,19 @@ class _Profile_ScreenState extends State<Profile_Screen> {
                       width: 180.0,
                       height: 60.0,
                       child: Card(
-                        child: ListTile(
-                          leading: Icon(Icons.shopping_basket,color: Colors.blue,),
-                          title: Text('My Orders'),
+                        child: GestureDetector(
+                          onTap: (){
+                            Navigator.pushReplacement<void, void>(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) => MyOrderScreen(),
+                              ),
+                            );
+                          },
+                          child: ListTile(
+                            leading: Icon(Icons.shopping_basket,color: Colors.blue,),
+                            title: Text('My Orders'),
+                          ),
                         ),
                       ),
                     ),
@@ -241,6 +549,68 @@ class _Profile_ScreenState extends State<Profile_Screen> {
               SizedBox(
                 height: 0,
               ),
+              Row(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(left:15.0),
+                    child: const Text("Delivery Address", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),textAlign: TextAlign.left,),
+                  ),
+                  Spacer(),
+
+
+                ],
+              ),
+              Card(
+                child: ListTile(
+                  leading: Column(
+                    children: [
+                      Icon(FontAwesomeIcons.house,),
+                      Text("Home")
+                    ],
+                  ),
+                  title: Text(delvaddress.isEmpty ? "" :delvaddress[0].haLineOne!+', '+delvaddress[0].haLineTwo!+','+delvaddress[0].haCity+', Pin-'+delvaddress[0].haPinCode+', '+delvaddress[0].haState),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(delvaddress.isEmpty ? "" :"Landmark: "+delvaddress[0].haLandMark!),
+                      Text(delvaddress.isEmpty ? "" :"Contact: "+delvaddress[0].haPhone!),
+                    ],
+                  ),
+                  trailing:ElevatedButton(
+                    onPressed: (){
+                      saveAddress("homeAddress");
+                    },
+                    child: Text(delvaddress.isEmpty ? "Add" :"Edit"),
+                  ),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: Column(
+                    children: [
+                      Icon(FontAwesomeIcons.briefcase,),
+                      Text("Work")
+                    ],
+                  ),
+                  title: Text(delvaddress.isEmpty ? "" :delvaddress[0].waLineOne!+', '+delvaddress[0].waLineTwo!+','+delvaddress[0].waCity+', Pin-'+delvaddress[0].waPinCode+', '+delvaddress[0].waState),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(delvaddress.isEmpty ? "" :"Landmark: "+delvaddress[0].waLandMark!),
+                      Text(delvaddress.isEmpty ? "" :"Contact: "+delvaddress[0].waPhone!),
+                    ],
+                  ),
+                  trailing:ElevatedButton(
+                    onPressed: (){
+                      saveAddress("workAddress");
+                    },
+                    child: Text(delvaddress.isEmpty ? "Add" :"Edit"),
+                  ),
+                ),
+              ),
+              const Divider(
+                thickness: 5,
+              ),
               Card(
                 child: ListTile(
                   leading: Icon(FontAwesomeIcons.userGroup,),
@@ -261,67 +631,7 @@ class _Profile_ScreenState extends State<Profile_Screen> {
               SizedBox(
                 height: 8,
               ),
-              Row(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(left:15.0),
-                    child: Text("Reset Password", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),textAlign: TextAlign.left,),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(15, 8, 15, 0),
-                child: SizedBox(
-                  height: 50,
-                  child: TextField(
-                    obscureText: true,
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'New Password',
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                  height: 60,
-                  width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: ElevatedButton(
-                    child: const Text('Update Now'),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.cyan, // background
-                      onPrimary: Colors.white, // foreground
-                    ),
-                    onPressed: () {
-                      Dio().post("$baseUrl/updateuser_api",
-                        data:{
-                          "uid":this.uid,
-                          "name":nameController.text,
-                          "phone":phoneController.text,
-                          "password":passwordController.text
-                        },
-                        options: Options(
-                          responseType: ResponseType.plain,
-                        ),
-                      ).then((data) async {
-                        setState(() {
 
-                        });
-                        final scaffold = ScaffoldMessenger.of(context);
-                        await scaffold.showSnackBar(
-                          SnackBar(
-                            content: const Text('Your Profile has been Updated Successfully'),
-                            action: SnackBarAction(label: 'X', onPressed: scaffold.hideCurrentSnackBar),
-                          ),
-                        );
-                        Navigator.pushReplacement(context,MaterialPageRoute(
-                            builder: (BuildContext context) => super.widget));
-
-                      });
-                    },
-                  )
-              ),
               Divider(
                 thickness: 5,
               ),
@@ -330,8 +640,8 @@ class _Profile_ScreenState extends State<Profile_Screen> {
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black38, // background
-                      onPrimary: Colors.white, // foreground
+                      backgroundColor: Colors.black38, // background
+                      foregroundColor: Colors.white, // foreground
                     ),
                     onPressed: () async {
                   final prefs = await SharedPreferences.getInstance();

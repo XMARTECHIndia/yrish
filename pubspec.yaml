@@ -29,7 +29,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^4.0.4
+  dio: ^4.0.6
   carousel_slider: ^4.0.0
   font_awesome_flutter: ^10.1.0
   badges: ^2.0.3
@@ -43,6 +43,7 @@ dependencies:
   date_count_down: ^2.1.0
   multiselect_formfield: ^0.1.7
   intl: ^0.17.0
+  loader_overlay: ^2.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -57,13 +58,14 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 
 flutter_icons:
-  image_path: icons/yrislogo.jpeg
+  image_path: images/yrislgo.png
   android: true
   ios: true
 # The following section is specific to Flutter packages.
@@ -80,6 +82,7 @@ flutter:
     - images/app_background.jpg
     - images/app_background1.jpg
     - images/app_back.jpg
+    - images/smartphone.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

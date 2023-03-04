@@ -75,6 +75,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String dropdownstate = statelist.elementAt(28);
   String dropdowngender = genderlist.first;
   String _currentSelectedValue ="";
+
+  bool is_verified = false;
   late final void Function()? onChanged;
   @override
   void dispose() {
@@ -88,7 +90,45 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.initState();
 
   }
+  getonetime(phone){
+    Dio().post("$baseUrl/get_verify_otp",
+      data:{
+        "usrid" : "u"+phone,
+        "mobile" : phone
+      },
+      options: Options(
+        responseType: ResponseType.plain,
+      ),
+    ).then((data){
+      setState(() {
+        //print(data.data);
 
+      });
+    });
+  }
+  getverified(phone, otp){
+    Dio().post("$baseUrl/verify_otp",
+      data:{
+        "mobile" : phone,
+        "otp" :  otp,
+        "otpfor" : "regis"
+      },
+      options: Options(
+        responseType: ResponseType.plain,
+      ),
+    ).then((data){
+      setState(() {
+        //print(data.data);
+        if(data.data == "true"){
+          //print(data.data);
+          is_verified = true;
+        }else{
+          is_verified = false;
+          //print(data.data);
+        }
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,48 +187,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                 ),
-                // Row(
-                //   children: [
-                //     Padding(
-                //       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-                //       child: Icon(Icons.wc,color: Colors.cyan,size: 20,),
-                //     ),
-                //     Padding(
-                //       padding: const EdgeInsets.only(right: 8.0, left: 0.0),
-                //       child: Text("Gender",style: TextStyle(
-                //         fontSize: 16,
-                //       ),),
-                //     ),
-                //     Container(
-                //       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                //       //color: Colors.white,
-                //       //height: 65,
-                //       child: DropdownButton<String>(
-                //         value: dropdowngender,
-                //         icon: const Icon(Icons.arrow_drop_down),
-                //         elevation: 16,
-                //         style: const TextStyle(color: Colors.black54),
-                //         underline: Container(
-                //           height: 2,
-                //           color: Colors.cyan,
-                //         ),
-                //         onChanged: (String? value) {
-                //           // This is called when the user selects an item.
-                //           setState(() {
-                //             dropdowngender = value!;
-                //           });
-                //         },
-                //         items: genderlist.map<DropdownMenuItem<String>>((String value) {
-                //           return DropdownMenuItem<String>(
-                //             value: value,
-                //             child: Text(value),
-                //           );
-                //         }).toList(),
-                //       ),
-                //     ),
-                //
-                //   ],
-                // ),
                 FormField<String>(
                   builder: (FormFieldState<String> state) {
                     return Container(
@@ -253,7 +251,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     onTap: () async {
                       DateTime? pickedDate = await showDatePicker(
                           context: context, initialDate: DateTime.now(),
-                          firstDate: DateTime(2000), //DateTime.now() - not to allow to choose before today.
+                          firstDate: DateTime(1947), //DateTime.now() - not to allow to choose before today.
                           lastDate: DateTime(2101)
                       );
 
@@ -284,33 +282,53 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             labelText: 'Mobile Number',
-                            suffix: GestureDetector(
-                              onTap: () => showDialog<String>(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title:  Column(
-                                    children: [
-                                      Text('Enter The OTP'),
-                                      Text("has been send to +91"+phoneController.text!, style: TextStyle(fontSize: 15),),
-                                    ],
-                                  ),
-                                  content: TextField(
-                                    controller: OTPController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(hintText: "XXXX",),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context, 'OK'),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            suffix: is_verified == true ? Text("Verified",style: TextStyle(color: Colors.green),):GestureDetector(
+                              onTap: () {
+                                showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
+                                        title: Column(
+                                          children: [
+                                            Text('Enter The OTP '),
+                                            Text("has been send to +91" +
+                                                phoneController.text!,
+                                              style: TextStyle(fontSize: 15),),
+                                          ],
+                                        ),
+                                        content: TextField(
+                                          controller: OTPController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            enabledBorder: const OutlineInputBorder(
+                                              borderSide: const BorderSide(color: Colors.cyan, width: 1.0),
+                                            ),
+                                            focusedBorder: const OutlineInputBorder(
+                                              borderSide: const BorderSide(color: Colors.cyan, width: 2.0),
+                                            ),
+                                            border: OutlineInputBorder(),
+                                            labelText: 'Enter Your OTP',
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(
+                                                    context, 'Cancel'),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              getverified(phoneController.text!, OTPController.text!);
+                                              Navigator.pop(context, 'OK');
+                                              },
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                                getonetime(phoneController.text!);
+                              },
                                 child: Text("Verify",style: TextStyle(color: Colors.blue),)
                             ),
                             // suffixIcon: IconButton(
@@ -320,28 +338,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             // ),
                             errorText: _phonevalidate ? 'Mobile Number Can\'t Be Empty' : null,
                           ),
+                            onChanged:(value) => setState(() {
+
+                              is_verified = false;
+                            }),
                         ),
                       ),
                     ),
-                    // Container(
-                    //     padding: const EdgeInsets.all(10),
-                    //     child: Text("Get Verified")
-                    // ),
                   ],
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  //color: Colors.white,
-                  height: 65,
-                  child: TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Mobile Number',
-                      errorText: _phonevalidate ? 'Mobile Number Can\'t Be Empty' : null,
-                    ),
-                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -414,22 +418,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     );
                   },
                 ),
-                //
-                // Container(
-                //   padding: const EdgeInsets.all(10),
-                //   //color: Colors.white,
-                //   //height: 65,
-                //   child: TextField(
-                //     controller: addressController,
-                //     keyboardType: TextInputType.text,
-                //     maxLines: 2,
-                //     decoration: InputDecoration(
-                //       border: OutlineInputBorder(),
-                //       labelText: 'Full Address',
-                //       errorText: _addressvalidate ? 'Address Can\'t Be Empty' : null,
-                //     ),
-                //   ),
-                // ),
                 Container(
                   padding: const EdgeInsets.all(10),
                   //color: Colors.white,
@@ -486,47 +474,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     );
                   },
                 ),
-                // Row(
-                //   children: [
-                //     Padding(
-                //       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-                //       child: Icon(Icons.medical_services,color: Colors.cyan,size: 20,),
-                //     ),
-                //     Padding(
-                //       padding: const EdgeInsets.only(right: 8.0, left: 8.0),
-                //       child: Text("Occupation",style: TextStyle(
-                //         fontSize: 16,
-                //       ),),
-                //     ),
-                //     Container(
-                //       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                //       //color: Colors.white,
-                //       //height: 65,
-                //       child: DropdownButton<String>(
-                //         value: dropdownValue,
-                //         icon: const Icon(Icons.arrow_downward),
-                //         elevation: 16,
-                //         style: const TextStyle(color: Colors.black54),
-                //         underline: Container(
-                //           height: 2,
-                //           color: Colors.cyan,
-                //         ),
-                //         onChanged: (String? value) {
-                //           // This is called when the user selects an item.
-                //           setState(() {
-                //             dropdownValue = value!;
-                //           });
-                //         },
-                //         items: list.map<DropdownMenuItem<String>>((String value) {
-                //           return DropdownMenuItem<String>(
-                //             value: value,
-                //             child: Text(value),
-                //           );
-                //         }).toList(),
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -546,27 +493,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                 ),
-                // Container(
-                //   padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-                //   decoration: BoxDecoration(
-                //     //color: Colors.white,
-                //     borderRadius: BorderRadius.only(
-                //       bottomRight: Radius.circular(10),
-                //       bottomLeft: Radius.circular(10),
-                //     ),
-                //   ),
-                //   height: 65,
-                //   child: TextField(
-                //     obscureText: true,
-                //     controller: passwordController,
-                //     decoration: InputDecoration(
-                //       border: OutlineInputBorder(),
-                //       labelText: 'Password',
-                //       errorText: _passvalidate ? 'Password Can\'t Be Empty' : null,
-                //     ),
-                //   ),
-                // ),
-
                 Container(
                     height: 50,
                     margin: EdgeInsets.only(top: 10),
@@ -574,29 +500,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(primary: Colors.cyan,),
                       child: const Text('Register'),
-                      onPressed: () {
-                        // print(nameController.text);
-                        // print(passwordController.text);
+                      onPressed: is_verified != true ?  null : () {
                         setState(() {
                           nameController.text.isEmpty ? _namevalidate = true : _namevalidate = false;
                           emailController.text.isEmpty ? _emailvalidate = true : _emailvalidate = false;
                           phoneController.text.isEmpty ? _phonevalidate = true : _phonevalidate = false;
-                          addressController.text.isEmpty ? _addressvalidate = true : _addressvalidate = false;
+                          //addressController.text.isEmpty ? _addressvalidate = true : _addressvalidate = false;
                           pincodeController.text.isEmpty ? _pincodevalidate = true : _pincodevalidate = false;
-                          passwordController.text.isEmpty ? _passvalidate = true : _passvalidate = false;
+                         // passwordController.text.isEmpty ? _passvalidate = true : _passvalidate = false;
                         });
-                        if(!_namevalidate && !_emailvalidate && !_phonevalidate && !_addressvalidate && !_pincodevalidate && !_passvalidate) {
+                        if(!_namevalidate && !_emailvalidate && !_phonevalidate&& !_pincodevalidate ) {
                           Dio().post("$baseUrl/setuser_api",
                             data: {
                               "name": nameController.text,
+                              "dob": dobController.text,
+                              "gender": dropdowngender,
                               "email": emailController.text,
                               "phone": phoneController.text,
                               "altphone": whatsappController.text,
-                              "address": addressController.text,
+                              "state": dropdownstate,
                               "pincode": pincodeController.text,
                               "occupation": dropdownValue,
                               "refbycode": referralController.text,
-                              "password": passwordController.text
                             },
                             options: Options(
                               responseType: ResponseType.plain,
